@@ -1,0 +1,19 @@
+Q1. Looking at the backtrace output, which function called syscall?
+A1. usertrap () at kernel/trap.c:67
+
+Q2. What is the value of p->trapframe->a7 and what does that value represent? (Hint: look user/initcode.S, the first user program xv6 starts.)
+A2. 7. initcode 프로세스의 a7 레지스터 값으로 kenel/syscall.h의 SYS_exec 값이다. (kernel/syscall.h -> SYS_exec 7)
+
+Q3. What was the previous mode that the CPU was in?
+A3. user mode ($sstatus의 SPP 비트가 0임)
+
+Q4. Write down the assembly instruction the kernel is panicing at. Which register corresponds to the variable num?
+A4.
+    80001c82:	00002683          	lw	a3,0(zero) # 0 <_entry-0x80000000>
+변수 num에 대응하는 레지스터는 a3다.
+
+Q5. Why does the kernel crash? Hint: look at figure 3-3 in the text; is address 0 mapped in the kernel address space? Is that confirmed by the value in scause above? (See description of scause in RISC-V privileged instructions)
+A5. 가상 주소 0에는 아무 것도 매핑되어 있지 않다. 이 가상 주소 0에 접근해서 데이터를 가져오려고 하니까 페이지 폴트가 발생하고, OS의 페이지 폴트 핸들러가 이를 잡는데, 할 수 있는 것이 없어서 패닉이 발생한다.
+
+Q6. What is the name of the process that was running when the kernel paniced? What is its process id (pid)?
+A6. process name: initcode / pid: 1
