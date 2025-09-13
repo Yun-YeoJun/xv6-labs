@@ -17,3 +17,9 @@ https://pdos.csail.mit.edu/6.1810/2024/labs/util.html
     - https://github.com/Yun-YeoJun/xv6-labs/blob/util/user/find.c
 - xargs (moderate)
     - https://github.com/Yun-YeoJun/xv6-labs/blob/util/user/xargs.c
+
+## Lab: system calls
+https://pdos.csail.mit.edu/6.1810/2024/labs/syscall.html
+
+- Using gdb (easy)
+    - https://github.com/Yun-YeoJun/xv6-labs/blob/syscall/answers-syscall.txt
