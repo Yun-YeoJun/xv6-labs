@@ -25,3 +25,5 @@ https://pdos.csail.mit.edu/6.1810/2024/labs/syscall.html
     - https://github.com/Yun-YeoJun/xv6-labs/blob/syscall/answers-syscall.txt
 - System call tracing (moderate)
     - https://github.com/Yun-YeoJun/xv6-labs/commit/50b6825d07b05f52ca0519b8c74c16ae0890c280
+- Attack xv6 (moderate)
+    - https://github.com/Yun-YeoJun/xv6-labs/blob/syscall/user/attack.c 
