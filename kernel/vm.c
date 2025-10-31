@@ -17,6 +17,8 @@ extern char etext[];  // kernel.ld sets this to end of kernel code.
 
 extern char trampoline[]; // trampoline.S
 
+uint64 usyscall_pa;
+
 // Make a direct-map page table for the kernel.
 pagetable_t
 kvmmake(void)
@@ -55,7 +57,12 @@ kvmmake(void)
 
   // allocate and map a kernel stack for each process.
   proc_mapstacks(kpgtbl);
-  
+
+  // !! LAB_PGTBL !!
+  usyscall_pa = (uint64) kalloc();
+  kvmmap(kpgtbl, USYSCALL, usyscall_pa, PGSIZE, PTE_R | PTE_W);
+  // !! LAB_PGTBL !!
+
   return kpgtbl;
 }
 

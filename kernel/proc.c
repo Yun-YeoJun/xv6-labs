@@ -20,6 +20,10 @@ static void freeproc(struct proc *p);
 
 extern char trampoline[]; // trampoline.S
 
+// !! LAB_PGTBL !!
+extern uint64 usyscall_pa; // vm.c
+// !! LAB_PGTBL !!
+
 // helps ensure that wakeups of wait()ing
 // parents are not lost. helps obey the
 // memory model when using p->parent.
@@ -146,6 +150,12 @@ found:
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
 
+  // !! LAB_PGTBL !!
+  struct usyscall *u = (struct usyscall *)USYSCALL;
+  int pid = p->pid;
+  u->pid = pid;
+  // !! LAB_PGTBL !!
+
   return p;
 }
 
@@ -202,6 +212,14 @@ proc_pagetable(struct proc *p)
     return 0;
   }
 
+  // !! LAB_PGTBL !!
+  if(mappages(pagetable, USYSCALL, PGSIZE, usyscall_pa, PTE_R | PTE_U) < 0) {
+    uvmunmap(pagetable, USYSCALL, 1, 0);
+    uvmfree(pagetable, 0);
+    return 0;
+  }
+  // !! LAB_PGTBL !!
+
   return pagetable;
 }
 
@@ -212,6 +230,11 @@ proc_freepagetable(pagetable_t pagetable, uint64 sz)
 {
   uvmunmap(pagetable, TRAMPOLINE, 1, 0);
   uvmunmap(pagetable, TRAPFRAME, 1, 0);
+
+  // !! LAB_PGTBL !!
+  uvmunmap(pagetable, USYSCALL, 1, 0);
+  // !! LAB_PGTBL !!
+
   uvmfree(pagetable, sz);
 }
 
