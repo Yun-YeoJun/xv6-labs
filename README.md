@@ -18,7 +18,7 @@ https://pdos.csail.mit.edu/6.1810/2024/labs/util.html
 - xargs (moderate)
     - https://github.com/Yun-YeoJun/xv6-labs/blob/util/user/xargs.c
 
-## Lab: system calls
+## Lab: System Calls
 https://pdos.csail.mit.edu/6.1810/2024/labs/syscall.html
 
 - Using gdb (easy)
@@ -27,3 +27,9 @@ https://pdos.csail.mit.edu/6.1810/2024/labs/syscall.html
     - https://github.com/Yun-YeoJun/xv6-labs/commit/50b6825d07b05f52ca0519b8c74c16ae0890c280
 - Attack xv6 (moderate)
     - https://github.com/Yun-YeoJun/xv6-labs/blob/syscall/user/attack.c 
+
+## Lab: Page Tables
+https://pdos.csail.mit.edu/6.1810/2024/labs/pgtbl.html
+
+- Speed up system calls (easy)
+    - https://github.com/Yun-YeoJun/xv6-labs/commit/37416d07ea55fc577498ccbd7bcf6c01c62eb7f1
