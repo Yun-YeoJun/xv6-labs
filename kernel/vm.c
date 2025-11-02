@@ -495,9 +495,38 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
 
 
 #ifdef LAB_PGTBL
+
+#define PGTBL_MAX_LEVEL 3
+
+void vmprinthelper(pagetable_t pagetable, int level, uint64 base_va) {
+  if (level == PGTBL_MAX_LEVEL + 1) {
+    printf("page table %p\n", pagetable);
+    vmprinthelper(pagetable, level - 1, base_va);
+    return;
+  }
+
+  for (int i = 0; i < 512; i++) {
+    pte_t pte = pagetable[i];
+    if ((pte & PTE_V) && (pte & (PTE_R|PTE_W|PTE_X)) == 0) {
+      for (int j = 0; j <= PGTBL_MAX_LEVEL - level; j++)
+        printf(" ..");
+      uint64 next_level_base_va = base_va | ((long)i << ((level-1)*9 + 12));
+      printf("%p: pte %p pa %p\n", (void*)next_level_base_va, (void*)pte, (void*)PTE2PA(pte));
+      vmprinthelper((pagetable_t)PTE2PA(pte), level - 1, next_level_base_va);
+    }
+    else if (pte & PTE_V) {
+      for (int j = 0; j <= PGTBL_MAX_LEVEL - level; j++)
+        printf(" ..");
+      uint64 va = base_va | ((long)i << ((level-1)*9 + 12));
+      printf("%p: pte %p pa %p\n", (void*)va, (void*)pte, (void*)PTE2PA(pte));
+    }
+  }
+}
+
 void
 vmprint(pagetable_t pagetable) {
   // your code here
+  vmprinthelper(pagetable, PGTBL_MAX_LEVEL + 1, 0);
 }
 #endif
 
