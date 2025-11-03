@@ -21,6 +21,7 @@ struct run {
 struct {
   struct spinlock lock;
   struct run *freelist;
+  struct run *free_super_list;
 } kmem;
 
 void
@@ -35,8 +36,12 @@ freerange(void *pa_start, void *pa_end)
 {
   char *p;
   p = (char*)PGROUNDUP((uint64)pa_start);
-  for(; p + PGSIZE <= (char*)pa_end; p += PGSIZE)
+  for(; p + PGSIZE <= (char*)pa_end - 10 * SUPERPGSIZE; p += PGSIZE)
     kfree(p);
+
+  p = (char*)SUPERPGROUNDUP((uint64)p);
+  for (; p + SUPERPGSIZE <= (char*)pa_end; p += SUPERPGSIZE)
+    superfree(p);
 }
 
 // Free the page of physical memory pointed at by pa,
@@ -79,4 +84,42 @@ kalloc(void)
   if(r)
     memset((char*)r, 5, PGSIZE); // fill with junk
   return (void*)r;
+}
+
+void *
+superalloc(void) {
+  struct run *r;
+
+  acquire(&kmem.lock);
+  r = kmem.free_super_list;
+  if(r)
+    kmem.free_super_list = r->next;
+  release(&kmem.lock);
+
+  if(r)
+    memset((char*)r, 5, SUPERPGSIZE);
+  return (void*)r;
+}
+
+void
+superfree(void *pa) {
+  struct run *r;
+
+  if(((uint64)pa % SUPERPGSIZE) != 0) {
+    printf("superfree panic: pa = %lu\n", (uint64)pa);
+    panic("superfree");
+  }
+  if ((char*)pa < end)
+    panic("superfree");
+  if ((uint64)pa >= PHYSTOP)
+    panic("superfree");
+
+  memset(pa, 1, SUPERPGSIZE);
+
+  r = (struct run*)pa;
+
+  acquire(&kmem.lock);
+  r->next = kmem.free_super_list;
+  kmem.free_super_list = r;
+  release(&kmem.lock);
 }
