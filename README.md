@@ -37,3 +37,11 @@ https://pdos.csail.mit.edu/6.1810/2024/labs/pgtbl.html
     - https://github.com/Yun-YeoJun/xv6-labs/commit/101255db8b5eb8eadda01b45e321cf4d9ea61001
 - Use superpages (moderate)/(hard)
     - https://github.com/Yun-YeoJun/xv6-labs/commit/b72d697e3123c77e2ea31d650219dbdd2c1026d5
+ 
+## Lab: Traps
+https://pdos.csail.mit.edu/6.1810/2024/labs/traps.html
+
+- RISC-V assembly (easy)
+    - https://github.com/Yun-YeoJun/xv6-labs/blob/traps/answers-traps.txt
+- Backtrace (moderate)
+- Alarm (hard)
