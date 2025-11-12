@@ -46,3 +46,5 @@ https://pdos.csail.mit.edu/6.1810/2024/labs/traps.html
 - Backtrace (moderate)
     - [Solution Link](https://github.com/Yun-YeoJun/xv6-labs/commit/0d123d12f402addb9ac7621a4f198f924f63514c)
 - Alarm (hard)
+    - [Solution Link](https://github.com/Yun-YeoJun/xv6-labs/commit/36476e16968789605feb29f90ced7bd867e4c491)
+  
