@@ -58,6 +58,11 @@ OBJS += \
 	$K/pci.o
 endif
 
+ifeq ($(LAB),traps)
+OBJS += \
+	$K/alarm.o\
+	$K/sysalarm.o
+endif
 
 # riscv64-unknown-elf- or riscv64-linux-gnu-
 # perhaps in /opt/riscv/bin
@@ -213,7 +218,8 @@ endif
 ifeq ($(LAB),traps)
 UPROGS += \
 	$U/_call\
-	$U/_bttest
+	$U/_bttest\
+	$U/_alarmtest
 endif
 
 ifeq ($(LAB),lazy)
