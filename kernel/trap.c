@@ -67,6 +67,33 @@ usertrap(void)
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
+  } else if (r_scause() == 15) {
+    char *mem;
+    uint64 va = r_stval();
+    if (va >= MAXVA) {
+      printf("va >= MAXVA\n");
+      setkilled(p);
+    }
+    else {
+      pte_t *pte = walk(p->pagetable, va, 0);
+      if (pte == 0 || (*pte & PTE_V) == 0 || (*pte & PTE_U) == 0) {
+        printf("usertrap: invalid write va=0x%p\n", (void *) va);
+        setkilled(p);
+      } else if ((*pte & PTE_COW) != 0 && (*pte & PTE_COW_W) != 0) {
+        if ((mem = kalloc()) == 0) {
+          printf("kalloc() err\n");
+          exit(-1);
+        }
+        uint64 pa = PTE2PA(*pte);
+        uint64 flags = (PTE_FLAGS(*pte) & (~PTE_COW) & (~PTE_COW_W)) | (PTE_W);
+        memmove(mem, (char *) pa, PGSIZE);
+        *pte = PA2PTE(mem) | ((flags & ~(PTE_COW | PTE_COW_W | PTE_W)) | PTE_W);
+        kfree((void *) pa);
+      } else {
+        printf("read only page\n");
+        exit(-1);
+      }
+    }
   } else {
     printf("usertrap(): unexpected scause 0x%lx pid=%d\n", r_scause(), p->pid);
     printf("            sepc=0x%lx stval=0x%lx\n", r_sepc(), r_stval());

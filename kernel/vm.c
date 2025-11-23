@@ -315,7 +315,6 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
   pte_t *pte;
   uint64 pa, i;
   uint flags;
-  char *mem;
 
   for(i = 0; i < sz; i += PGSIZE){
     if((pte = walk(old, i, 0)) == 0)
@@ -324,19 +323,20 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
       panic("uvmcopy: page not present");
     pa = PTE2PA(*pte);
     flags = PTE_FLAGS(*pte);
-    if((mem = kalloc()) == 0)
-      goto err;
-    memmove(mem, (char*)pa, PGSIZE);
-    if(mappages(new, i, PGSIZE, (uint64)mem, flags) != 0){
-      kfree(mem);
-      goto err;
+
+    *pte = *pte | PTE_COW;
+    if ((*pte & PTE_W) != 0) {
+      *pte = *pte | PTE_COW_W;
     }
+
+    *pte = *pte & ~PTE_W;
+
+    uint child_flags = (flags & ~PTE_W) | PTE_COW;
+    child_flags = (flags & PTE_W) ? child_flags | PTE_COW_W : child_flags;
+    mappages(new, i, PGSIZE, pa, child_flags);
+    ref_cnt_up(PTE2PA(*pte));
   }
   return 0;
-
- err:
-  uvmunmap(new, 0, i / PGSIZE, 1);
-  return -1;
 }
 
 // mark a PTE invalid for user access.
@@ -367,8 +367,18 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
       return -1;
     pte = walk(pagetable, va0, 0);
     if(pte == 0 || (*pte & PTE_V) == 0 || (*pte & PTE_U) == 0 ||
-       (*pte & PTE_W) == 0)
+       ((*pte & PTE_COW) == 0 && (*pte & PTE_W) == 0) ||
+       ((*pte & PTE_COW) != 0 && (*pte & PTE_COW_W) == 0))
       return -1;
+    char *mem;
+    if ((*pte & PTE_COW) != 0 && (*pte & PTE_COW_W) != 0) {
+      if ((mem = kalloc()) == 0)
+        return -1;
+      uint64 pa = PTE2PA(*pte);
+      memmove(mem, (char*)pa, PGSIZE);
+      *pte = PA2PTE((uint64)mem) | ((PTE_FLAGS(*pte) & ~(PTE_COW | PTE_COW_W | PTE_W)) | PTE_W);
+      kfree((void*)pa);
+    }
     pa0 = PTE2PA(*pte);
     n = PGSIZE - (dstva - va0);
     if(n > len)
